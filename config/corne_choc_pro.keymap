@@ -117,13 +117,17 @@
         lower_layer {
             display-name = "NUMBER";
             // ---------------------------------------------------------------------------------
-            // |  1  |  2  |  3  |  4  |  5  |     |     |  6  |  7  |  8  |  9  |  0  |
-            // | BT1 | BT2 | BT3 | BT4 | BT5 |     |     |  <- |  v  |  ^  |  -> | DEL |
-            // |     | RGB | CAPS| BOOT|UNLCK|              HOME| PGDN| PGUP| END |     |
+            // |  F1 |  F2 |  F3 |  F4 |  F5 |     |     |  *  |  7  |  8  |  9  |  /  |
+            // | BT1 | BT2 | BT3 | BT4 | BT5 |     |     |  -  |  4  |  5  |  6  |  +  |
+            // | LOCK| RGB | CAPS| BOOT|UNLCK|                 0  |  1  |  2  |  3  |  .  |
+            //
+            // Numpad sits under the right hand in the usual 789 / 456 / 123 grid,
+            // with the operators on the outer columns. LOCK (on Z) toggles this
+            // layer on so you can let go of the thumb; tap it again to leave.
             bindings = <
-                &kp N1       &kp N2          &kp N3       &kp N4       &kp N5           &trans  &trans  &kp N6    &kp N7    &kp N8    &kp N9    &kp N0
-                &bt BT_SEL 0 &bt BT_SEL 1    &bt BT_SEL 2 &bt BT_SEL 3 &bt BT_SEL 4     &trans  &trans  &kp LEFT  &kp DOWN  &kp UP    &kp RIGHT &kp DEL
-                &trans       &rgb_ug RGB_TOG &caps_word   &bootloader  &studio_unlock                   &kp HOME  &kp PG_DN &kp PG_UP &kp END   &trans
+                &kp F1       &kp F2          &kp F3       &kp F4       &kp F5           &trans  &trans  &kp ASTRK &kp N7    &kp N8    &kp N9    &kp FSLH
+                &bt BT_SEL 0 &bt BT_SEL 1    &bt BT_SEL 2 &bt BT_SEL 3 &bt BT_SEL 4     &trans  &trans  &kp MINUS &kp N4    &kp N5    &kp N6    &kp PLUS
+                &tog 1       &rgb_ug RGB_TOG &caps_word   &bootloader  &studio_unlock                   &kp N0    &kp N1    &kp N2    &kp N3    &kp DOT
                                              &trans       &trans       &trans                   &trans  &trans    &trans
             >;
             sensor-bindings = <&pane_cycle      // left dial  -> herdr panes
@@ -135,14 +139,18 @@
         raise_layer {
             display-name = "SYMBOL";
             // ---------------------------------------------------------------------------------
-            // |  !  |  @  |  #  |  $  |  %  |     |     |  ^  |  &  |  *  |  (  |  )  |
-            // |  ~  |  `  |  {  |  }  | "|" |     |     |  -  |  =  |  [  |  ]  |  ;  |
-            // | HUD | HUI |     |     |     |              _  |  +  |  <  |  >  |  \  |
+            // |  !  |  @  |  #  |  $  |  %  |     |     |  [  |  ]  |  {  |  }  |  =  |
+            // |  ^  |  &  |  *  |  (  |  )  |     |     |  -  |  _  |  ^  |  +  |  ;  |
+            // |  ~  |  `  | "|" |  \  |  /  |                 <  |  <- |  v  |  -> |  >  |
+            //
+            // Every symbol lives on the left half. The right hand gets an
+            // inverted-T of arrows on K / M / , / . so it can navigate without
+            // leaving home position.
             bindings = <
-                &kp EXCL        &kp AT          &kp HASH  &kp DLLR &kp PRCNT  &trans  &trans  &kp CARET &kp AMPS  &kp ASTRK &kp LPAR &kp RPAR
-                &kp TILDE       &kp GRAVE       &kp LBRC  &kp RBRC &kp PIPE   &trans  &trans  &kp MINUS &kp EQUAL &kp LBKT  &kp RBKT &kp SEMI
-                &rgb_ug RGB_HUD &rgb_ug RGB_HUI &trans    &trans   &trans                     &kp UNDER &kp PLUS  &kp LT    &kp GT   &kp BSLH
-                                                &trans    &trans   &trans             &trans  &trans    &trans
+                &kp EXCL  &kp AT    &kp HASH  &kp DLLR  &kp PRCNT  &trans  &trans  &kp LBKT  &kp RBKT  &kp LBRC  &kp RBRC   &kp EQUAL
+                &kp CARET &kp AMPS  &kp ASTRK &kp LPAR  &kp RPAR   &trans  &trans  &kp MINUS &kp UNDER &kp UP    &kp PLUS   &kp SEMI
+                &kp TILDE &kp GRAVE &kp PIPE  &kp BSLH  &kp FSLH                   &kp LT    &kp LEFT  &kp DOWN  &kp RIGHT  &kp GT
+                                    &trans    &trans    &trans             &trans  &trans    &trans
             >;
             sensor-bindings = <&inc_dec_kp LG(LS(Z)) LG(Z)   // left dial -> redo / undo
                                &inc_dec_kp LG(LS(Z)) LG(Z)
