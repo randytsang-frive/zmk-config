@@ -140,16 +140,19 @@
             display-name = "SYMBOL";
             // ---------------------------------------------------------------------------------
             // |  !  |  @  |  #  |  $  |  %  |     |     |  [  |  ]  |  {  |  }  |  =  |
-            // |  ^  |  &  |  *  |  (  |  )  |     |     |  -  |  _  |  ^  |  +  |  ;  |
-            // |  ~  |  `  | "|" |  \  |  /  |                 <  |  <- |  v  |  -> |  >  |
+            // |  ^  |  &  |  *  |  (  |  )  |  ~  |     |  -  |  _  |  ^  |  +  |  ;  |
+            // | LOCK|  `  | "|" |  \  |  /  |                 <  |  <- |  v  |  -> |  >  |
             //
             // Every symbol lives on the left half. The right hand gets an
             // inverted-T of arrows on K / M / , / . so it can navigate without
             // leaving home position.
+            //
+            // LOCK sits on Z, same as on NUMBER: Z always latches whichever
+            // layer you are currently holding.
             bindings = <
-                &kp EXCL  &kp AT    &kp HASH  &kp DLLR  &kp PRCNT  &trans  &trans  &kp LBKT  &kp RBKT  &kp LBRC  &kp RBRC   &kp EQUAL
-                &kp CARET &kp AMPS  &kp ASTRK &kp LPAR  &kp RPAR   &trans  &trans  &kp MINUS &kp UNDER &kp UP    &kp PLUS   &kp SEMI
-                &kp TILDE &kp GRAVE &kp PIPE  &kp BSLH  &kp FSLH                   &kp LT    &kp LEFT  &kp DOWN  &kp RIGHT  &kp GT
+                &kp EXCL  &kp AT    &kp HASH  &kp DLLR  &kp PRCNT  &trans     &trans  &kp LBKT  &kp RBKT  &kp LBRC  &kp RBRC   &kp EQUAL
+                &kp CARET &kp AMPS  &kp ASTRK &kp LPAR  &kp RPAR   &kp TILDE  &trans  &kp MINUS &kp UNDER &kp UP    &kp PLUS   &kp SEMI
+                &tog 2    &kp GRAVE &kp PIPE  &kp BSLH  &kp FSLH                     &kp LT    &kp LEFT  &kp DOWN  &kp RIGHT  &kp GT
                                     &trans    &trans    &trans             &trans  &trans    &trans
             >;
             sensor-bindings = <&inc_dec_kp LG(LS(Z)) LG(Z)   // left dial -> redo / undo
