@@ -125,7 +125,7 @@
         lower_layer {
             display-name = "NUMBER";
             // ---------------------------------------------------------------------------------
-            // |  F1 |  F2 |  F3 |  F4 |  F5 | CMD-` | ZOOM |  *  |  7  |  8  |  9  |  /  |
+            // |  F1 |  F2 |  F3 |  F4 |  F5 | CMD-` | ZOOM |  /  |  7  |  8  |  9  |  *  |
             // | BT1 | BT2 | BT3 | BT4 | BT5 | SHOT4 | SHOT5|  -  |  4  |  5  |  6  |  +  |
             // | LOCK| RGB | CAPS| BOOT|UNLCK|                  0  |  1  |  2  |  3  |  .  |
             //
@@ -141,7 +141,7 @@
             // (left hand only, so the mouse is free to drag it out) and
             // Cmd+Shift+5 for the capture toolbar.
             bindings = <
-                &kp F1       &kp F2          &kp F3       &kp F4       &kp F5           &kp LG(GRAVE)     &pane_zoom       &kp ASTRK &kp N7    &kp N8    &kp N9    &kp FSLH
+                &kp F1       &kp F2          &kp F3       &kp F4       &kp F5           &kp LG(GRAVE)     &pane_zoom       &kp FSLH  &kp N7    &kp N8    &kp N9    &kp ASTRK
                 &bt BT_SEL 0 &bt BT_SEL 1    &bt BT_SEL 2 &bt BT_SEL 3 &bt BT_SEL 4     &kp LG(LS(N4))    &kp LG(LS(N5))   &kp MINUS &kp N4    &kp N5    &kp N6    &kp PLUS
                 &tog 1       &rgb_ug RGB_TOG &caps_word   &bootloader  &studio_unlock                   &kp N0    &kp N1    &kp N2    &kp N3    &kp DOT
                                              &trans       &trans       &trans                   &trans  &trans    &trans
