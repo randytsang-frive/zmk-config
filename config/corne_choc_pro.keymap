@@ -93,6 +93,29 @@
         };
     };
 
+    // Layer latches live on combos rather than on a key inside the layer.
+    // This ZMK is pinned to v0.3, which has no layer "locking": a &tog fired
+    // while the layer is held sees it already active, flips it off, and then
+    // the thumb release turns it off again -- so nothing happens. A combo
+    // fires with no layer held, so &tog behaves.
+    //
+    //   Z + X together  -> latch NUMBER   (same combo again to leave)
+    //   . + / together  -> latch SYMBOL
+    combos {
+        compatible = "zmk,combos";
+
+        combo_lock_num {
+            timeout-ms = <40>;
+            key-positions = <24 25>;
+            bindings = <&tog 1>;
+        };
+
+        combo_lock_sym {
+            timeout-ms = <40>;
+            key-positions = <32 33>;
+            bindings = <&tog 2>;
+        };
+    };
 
     keymap {
         compatible = "zmk,keymap";
@@ -127,11 +150,11 @@
             // ---------------------------------------------------------------------------------
             // |  F1 |  F2 |  F3 |  F4 |  F5 | CMD-` | ZOOM |  /  |  7  |  8  |  9  |  *  |
             // | BT1 | BT2 | BT3 | BT4 | BT5 | SHOT4 | SHOT5|  -  |  4  |  5  |  6  |  +  |
-            // | LOCK| RGB | CAPS| BOOT|UNLCK|                  0  |  1  |  2  |  3  |  .  |
+            // |     | RGB | CAPS| BOOT|UNLCK|                  0  |  1  |  2  |  3  |  .  |
             //
             // Numpad sits under the right hand in the usual 789 / 456 / 123 grid,
-            // with the operators on the outer columns. LOCK (on Z) toggles this
-            // layer on so you can let go of the thumb; tap it again to leave.
+            // with the operators on the outer columns. Z + X together latches
+            // this layer on so you can let go of the thumb; same combo to leave.
             //
             // Dial presses pair with what each dial does on this layer: the left
             // dial picks an app, its press walks that app's windows; the right
@@ -143,7 +166,7 @@
             bindings = <
                 &kp F1       &kp F2          &kp F3       &kp F4       &kp F5           &kp LG(GRAVE)     &pane_zoom       &kp FSLH  &kp N7    &kp N8    &kp N9    &kp ASTRK
                 &bt BT_SEL 0 &bt BT_SEL 1    &bt BT_SEL 2 &bt BT_SEL 3 &bt BT_SEL 4     &kp LG(LS(N4))    &kp LG(LS(N5))   &kp MINUS &kp N4    &kp N5    &kp N6    &kp PLUS
-                &tog 1       &rgb_ug RGB_TOG &caps_word   &bootloader  &studio_unlock                   &kp N0    &kp N1    &kp N2    &kp N3    &kp DOT
+                &trans       &rgb_ug RGB_TOG &caps_word   &bootloader  &studio_unlock                   &kp N0    &kp N1    &kp N2    &kp N3    &kp DOT
                                              &trans       &trans       &trans                   &trans  &trans    &trans
             >;
             sensor-bindings = <&app_switch      // left dial  -> Cmd+Tab
@@ -156,19 +179,18 @@
             display-name = "SYMBOL";
             // ---------------------------------------------------------------------------------
             // |  !  |  @  |  #  |  $  |  %  |     |     |  [  |  ]  |  {  |  }  |  =  |
-            // |  ^  |  &  |  *  |  (  |  )  |  ~  |     |  -  |  _  |  ^  |  +  |  ;  |
-            // | LOCK|  `  | "|" |  \  |  /  |                 <  |  <- |  v  |  -> |  >  |
+            // |  ^  |  &  |  *  |  (  |  )  |     |     |  -  |  _  |  ^  |  +  |  ;  |
+            // |  ~  |  `  | "|" |  \  |  /  |                 <  |  <- |  v  |  -> |  >  |
             //
             // Every symbol lives on the left half. The right hand gets an
             // inverted-T of arrows on K / M / , / . so it can navigate without
             // leaving home position.
             //
-            // LOCK sits on Z, same as on NUMBER: Z always latches whichever
-            // layer you are currently holding.
+            // . + / together latches this layer, mirroring Z + X on NUMBER.
             bindings = <
                 &kp EXCL  &kp AT    &kp HASH  &kp DLLR  &kp PRCNT  &trans     &trans  &kp LBKT  &kp RBKT  &kp LBRC  &kp RBRC   &kp EQUAL
-                &kp CARET &kp AMPS  &kp ASTRK &kp LPAR  &kp RPAR   &kp TILDE  &trans  &kp MINUS &kp UNDER &kp UP    &kp PLUS   &kp SEMI
-                &tog 2    &kp GRAVE &kp PIPE  &kp BSLH  &kp FSLH                     &kp LT    &kp LEFT  &kp DOWN  &kp RIGHT  &kp GT
+                &kp CARET &kp AMPS  &kp ASTRK &kp LPAR  &kp RPAR   &trans     &trans  &kp MINUS &kp UNDER &kp UP    &kp PLUS   &kp SEMI
+                &kp TILDE &kp GRAVE &kp PIPE  &kp BSLH  &kp FSLH                     &kp LT    &kp LEFT  &kp DOWN  &kp RIGHT  &kp GT
                                     &trans    &trans    &trans             &trans  &trans    &trans
             >;
             sensor-bindings = <&inc_dec_kp LG(LS(Z)) LG(Z)   // left dial -> redo / undo
