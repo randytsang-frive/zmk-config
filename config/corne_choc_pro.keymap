@@ -83,6 +83,14 @@
             #binding-cells = <0>;
             bindings = <&kp LC(B)>, <&kp LS(TAB)>;
         };
+
+        // prefix + z -- zoom the current pane to fullscreen, press again to
+        // restore. Sits on the press of the same dial that cycles panes.
+        pane_zoom: pane_zoom {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&kp LC(B)>, <&kp Z>;
+        };
     };
 
 
@@ -117,23 +125,31 @@
         lower_layer {
             display-name = "NUMBER";
             // ---------------------------------------------------------------------------------
-            // |  F1 |  F2 |  F3 |  F4 |  F5 |     |     |  *  |  7  |  8  |  9  |  /  |
-            // | BT1 | BT2 | BT3 | BT4 | BT5 |     |     |  -  |  4  |  5  |  6  |  +  |
-            // | LOCK| RGB | CAPS| BOOT|UNLCK|                 0  |  1  |  2  |  3  |  .  |
+            // |  F1 |  F2 |  F3 |  F4 |  F5 | CMD-` | ZOOM |  *  |  7  |  8  |  9  |  /  |
+            // | BT1 | BT2 | BT3 | BT4 | BT5 | SHOT4 | SHOT5|  -  |  4  |  5  |  6  |  +  |
+            // | LOCK| RGB | CAPS| BOOT|UNLCK|                  0  |  1  |  2  |  3  |  .  |
             //
             // Numpad sits under the right hand in the usual 789 / 456 / 123 grid,
             // with the operators on the outer columns. LOCK (on Z) toggles this
             // layer on so you can let go of the thumb; tap it again to leave.
+            //
+            // Dial presses pair with what each dial does on this layer: the left
+            // dial picks an app, its press walks that app's windows; the right
+            // dial finds a pane, its press zooms it.
+            //
+            // Screenshots sit on the inner columns -- Cmd+Shift+4 for a region
+            // (left hand only, so the mouse is free to drag it out) and
+            // Cmd+Shift+5 for the capture toolbar.
             bindings = <
-                &kp F1       &kp F2          &kp F3       &kp F4       &kp F5           &trans  &trans  &kp ASTRK &kp N7    &kp N8    &kp N9    &kp FSLH
-                &bt BT_SEL 0 &bt BT_SEL 1    &bt BT_SEL 2 &bt BT_SEL 3 &bt BT_SEL 4     &trans  &trans  &kp MINUS &kp N4    &kp N5    &kp N6    &kp PLUS
+                &kp F1       &kp F2          &kp F3       &kp F4       &kp F5           &kp LG(GRAVE)     &pane_zoom       &kp ASTRK &kp N7    &kp N8    &kp N9    &kp FSLH
+                &bt BT_SEL 0 &bt BT_SEL 1    &bt BT_SEL 2 &bt BT_SEL 3 &bt BT_SEL 4     &kp LG(LS(N4))    &kp LG(LS(N5))   &kp MINUS &kp N4    &kp N5    &kp N6    &kp PLUS
                 &tog 1       &rgb_ug RGB_TOG &caps_word   &bootloader  &studio_unlock                   &kp N0    &kp N1    &kp N2    &kp N3    &kp DOT
                                              &trans       &trans       &trans                   &trans  &trans    &trans
             >;
-            sensor-bindings = <&pane_cycle      // left dial  -> herdr panes
-                               &pane_cycle
-                               &app_switch      // right dial -> Cmd+Tab
-                               &app_switch>;
+            sensor-bindings = <&app_switch      // left dial  -> Cmd+Tab
+                               &app_switch
+                               &pane_cycle      // right dial -> herdr panes
+                               &pane_cycle>;
         };
 
         raise_layer {
