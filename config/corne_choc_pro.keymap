@@ -18,8 +18,8 @@
 / {
     behaviors {
         // Home-row mods. Tap = the letter, hold = the modifier.
-        // require-prior-idle-ms is the anti-misfire setting: mid-word the
-        // hold is ignored entirely, so fast typing can't trip a modifier.
+        // require-prior-idle-ms is the anti-misfire setting: mid-word the hold
+        // is ignored entirely, so fast typing can't trip a modifier.
         hm: homerow_mods {
             compatible = "zmk,behavior-hold-tap";
             #binding-cells = <2>;
@@ -29,65 +29,120 @@
             require-prior-idle-ms = <125>;
             bindings = <&kp>, <&kp>;
         };
+
+        // Hold B to send the tmux/herdr prefix. tap-preferred means the hold
+        // only fires after the full term even if another key is pressed, so
+        // rolling through B while typing stays a plain letter.
+        pfx: prefix_hold_tap {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "tap-preferred";
+            tapping-term-ms = <250>;
+            quick-tap-ms = <175>;
+            require-prior-idle-ms = <100>;
+            bindings = <&kp>, <&kp>;
+        };
+
+        // Cmd+Tab app switcher. Presses Cmd on the first detent, pulses Tab on
+        // each one after, and releases Cmd on any other key or layer change --
+        // which here means letting go of the NUMBER layer commits the switch.
+        swapper: swapper {
+            compatible = "zmk,behavior-tri-state";
+            #binding-cells = <0>;
+            bindings = <&kt LGUI>, <&kp TAB>, <&kt LGUI>;
+        };
+
+        // Encoder rotations that need something richer than a plain keypress.
+        pane_cycle: pane_cycle {
+            compatible = "zmk,behavior-sensor-rotate";
+            #sensor-binding-cells = <0>;
+            bindings = <&pane_next>, <&pane_prev>;
+        };
+
+        // Clockwise runs the swapper. Anticlockwise is a bare Shift+Tab, which
+        // walks backwards through the switcher because the swapper is already
+        // holding Cmd down.
+        app_switch: app_switch {
+            compatible = "zmk,behavior-sensor-rotate";
+            #sensor-binding-cells = <0>;
+            bindings = <&swapper>, <&kp LS(TAB)>;
+        };
     };
+
+    macros {
+        // herdr / tmux pane cycling. The prefix is a *sequence*, not a chord:
+        // press Ctrl+B, release, then Tab.
+        pane_next: pane_next {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&kp LC(B)>, <&kp TAB>;
+        };
+
+        pane_prev: pane_prev {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&kp LC(B)>, <&kp LS(TAB)>;
+        };
+    };
+
 
     keymap {
         compatible = "zmk,keymap";
 
         default_layer {
             display-name = "QWERTY";
-            // ------------------------------------------------------------------------------------------
-            // |  Q  |  W  |  E  |  R  |  T  | ^B(dial) | MUTE(dial) |  Y  |  U  |  I  |  O  |  P  |
-            // |  A  |  S  |  D  |  F  |  G  |  R-CTRL  |     '      |  H  |  J  |  K  |  L  |  ;  |
-            // |  Z  |  X  |  C  |  V  |  B  |                          N  |  M  |  ,  |  .  |  /  |
-            //             | CMD | ESC/NAV | SPACE |          | RET | TAB/SYM | BSPC |
+            // ---------------------------------------------------------------------------------
+            // |  Q  |  W  |  E  |  R  |  T  | WISPR |  PLAY  |  Y  |  U  |  I  |  O  |  P  |
+            // |  A  |  S  |  D  |  F  |  G  | STCKY |   '    |  H  |  J  |  K  |  L  |  -  |
+            // |  Z  |  X  |  C  |  V  |  B  |                   N  |  M  |  ,  |  .  |  /  |
+            //             | ESC/NUM | CMD | SPACE |     | RET | TAB/SYM | BSPC |
             //
-            // Home-row holds (left only, right hand stays on the mouse):
-            //   A = Ctrl    S = Option    D = Cmd    F = Shift
+            // Left-hand holds, so the right hand can stay on the mouse:
+            //   A = Ctrl   S = Option   D = Cmd   F = Shift   B = Ctrl+B (prefix)
             bindings = <
-                &kp Q       &kp W       &kp E       &kp R        &kp T   &kp LC(B)   &kp C_MUTE   &kp Y   &kp U   &kp I     &kp O   &kp P
-                &hm LCTRL A &hm LALT S  &hm LGUI D  &hm LSHFT F  &kp G   &kp RCTRL   &kp SQT      &kp H   &kp J   &kp K     &kp L   &kp SEMI
-                &kp Z       &kp X       &kp C       &kp V        &kp B                            &kp N   &kp M   &kp COMMA &kp DOT &kp FSLH
-                                        &kp LGUI    &lt 1 ESC    &kp SPACE            &kp RET     &lt 2 TAB   &kp BSPC
+                &kp Q       &kp W       &kp E       &kp R        &kp T           &kp RCTRL   &kp C_PP   &kp Y   &kp U   &kp I     &kp O   &kp P
+                &hm LCTRL A &hm LALT S  &hm LGUI D  &hm LSHFT F  &kp G           &sk LSHFT   &kp SQT    &kp H   &kp J   &kp K     &kp L   &kp MINUS
+                &kp Z       &kp X       &kp C       &kp V        &pfx LC(B) B                           &kp N   &kp M   &kp COMMA &kp DOT &kp FSLH
+                                        &lt 1 ESC   &kp LGUI     &kp SPACE                   &kp RET    &lt 2 TAB   &kp BSPC
             >;
-            // Slots: left_ex1, left_ex2, right_ex1, right_ex2.
-            // Both slots per half get the same binding, so it works whichever
-            // physical position the encoder is soldered into.
-            sensor-bindings = <&inc_dec_kp LG(EQUAL) LG(MINUS)   // left dial  -> Cmd+ / Cmd-  (Figma zoom)
-                               &inc_dec_kp LG(EQUAL) LG(MINUS)
-                               &inc_dec_kp C_VOL_UP C_VOL_DN     // right dial -> volume
-                               &inc_dec_kp C_VOL_UP C_VOL_DN>;
+            // Slots: left_ex1, left_ex2, right_ex1, right_ex2. Both slots per
+            // half share a binding, so it works whichever socket the encoder
+            // is actually soldered into.
+            sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN     // left dial  -> volume
+                               &inc_dec_kp C_VOL_UP C_VOL_DN
+                               &inc_dec_kp C_NEXT C_PREV         // right dial -> track skip
+                               &inc_dec_kp C_NEXT C_PREV>;
         };
 
         lower_layer {
             display-name = "NUMBER";
-            // ------------------------------------------------------------------------------------------
-            // |  1  |  2  |  3  |  4  |  5  |          |          |  6  |  7  |  8  |  9  |  0  |
-            // | BT1 | BT2 | BT3 | BT4 | BT5 |          |          | LFT | DWN |  UP | RGT | DEL |
-            // |BTCLR| RGB |RESET|BOOT |UNLCK|                     |HOME |PGDN |PGUP | END |     |
+            // ---------------------------------------------------------------------------------
+            // |  1  |  2  |  3  |  4  |  5  |     |     |  6  |  7  |  8  |  9  |  0  |
+            // | BT1 | BT2 | BT3 | BT4 | BT5 |     |     |  <- |  v  |  ^  |  -> | DEL |
+            // |     | RGB | CAPS| BOOT|UNLCK|              HOME| PGDN| PGUP| END |     |
             bindings = <
-                &kp N1       &kp N2          &kp N3       &kp N4       &kp N5         &trans  &trans  &kp N6    &kp N7    &kp N8   &kp N9    &kp N0
-                &bt BT_SEL 0 &bt BT_SEL 1    &bt BT_SEL 2 &bt BT_SEL 3 &bt BT_SEL 4   &trans  &trans  &kp LEFT  &kp DOWN  &kp UP   &kp RIGHT &kp DEL
-                &bt BT_CLR   &rgb_ug RGB_TOG &sys_reset   &bootloader  &studio_unlock                 &kp HOME  &kp PG_DN &kp PG_UP &kp END  &trans
-                                             &trans       &trans       &trans                 &trans  &trans    &trans
+                &kp N1       &kp N2          &kp N3       &kp N4       &kp N5           &trans  &trans  &kp N6    &kp N7    &kp N8    &kp N9    &kp N0
+                &bt BT_SEL 0 &bt BT_SEL 1    &bt BT_SEL 2 &bt BT_SEL 3 &bt BT_SEL 4     &trans  &trans  &kp LEFT  &kp DOWN  &kp UP    &kp RIGHT &kp DEL
+                &trans       &rgb_ug RGB_TOG &caps_word   &bootloader  &studio_unlock                   &kp HOME  &kp PG_DN &kp PG_UP &kp END   &trans
+                                             &trans       &trans       &trans                   &trans  &trans    &trans
             >;
-            sensor-bindings = <&inc_dec_kp PG_DN PG_UP
-                               &inc_dec_kp PG_DN PG_UP
-                               &inc_dec_kp C_NEXT C_PREV
-                               &inc_dec_kp C_NEXT C_PREV>;
+            sensor-bindings = <&pane_cycle      // left dial  -> herdr panes
+                               &pane_cycle
+                               &app_switch      // right dial -> Cmd+Tab
+                               &app_switch>;
         };
 
         raise_layer {
             display-name = "SYMBOL";
-            // ------------------------------------------------------------------------------------------
-            // |  !  |  @  |  #  |  $  |  %  |          |          |  ^  |  &  |  *  |  (  |  )  |
-            // |  ~  |  `  |  {  |  }  | "|" |          |          |  -  |  =  |  [  |  ]  |  \  |
-            // | HUD | HUI |     |     |     |                     |  _  |  +  |     |     |     |
+            // ---------------------------------------------------------------------------------
+            // |  !  |  @  |  #  |  $  |  %  |     |     |  ^  |  &  |  *  |  (  |  )  |
+            // |  ~  |  `  |  {  |  }  | "|" |     |     |  -  |  =  |  [  |  ]  |  ;  |
+            // | HUD | HUI |     |     |     |              _  |  +  |  <  |  >  |  \  |
             bindings = <
-                &kp EXCL        &kp AT          &kp HASH  &kp DLLR &kp PRCNT &trans  &trans  &kp CARET &kp AMPS  &kp ASTRK &kp LPAR &kp RPAR
-                &kp TILDE       &kp GRAVE       &kp LBRC  &kp RBRC &kp PIPE  &trans  &trans  &kp MINUS &kp EQUAL &kp LBKT  &kp RBKT &kp BSLH
-                &rgb_ug RGB_HUD &rgb_ug RGB_HUI &trans    &trans   &trans                    &kp UNDER &kp PLUS  &trans    &trans   &trans
-                                                &trans    &trans   &trans            &trans  &trans    &trans
+                &kp EXCL        &kp AT          &kp HASH  &kp DLLR &kp PRCNT  &trans  &trans  &kp CARET &kp AMPS  &kp ASTRK &kp LPAR &kp RPAR
+                &kp TILDE       &kp GRAVE       &kp LBRC  &kp RBRC &kp PIPE   &trans  &trans  &kp MINUS &kp EQUAL &kp LBKT  &kp RBKT &kp SEMI
+                &rgb_ug RGB_HUD &rgb_ug RGB_HUI &trans    &trans   &trans                     &kp UNDER &kp PLUS  &kp LT    &kp GT   &kp BSLH
+                                                &trans    &trans   &trans             &trans  &trans    &trans
             >;
             sensor-bindings = <&inc_dec_kp LG(LS(Z)) LG(Z)   // left dial -> redo / undo
                                &inc_dec_kp LG(LS(Z)) LG(Z)

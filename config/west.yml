@@ -2,12 +2,18 @@ manifest:
   remotes:
     - name: zmkfirmware
       url-base: https://github.com/zmkfirmware
-    # Additional modules containing boards/shields/custom code can be listed here as well
-    # See https://docs.zephyrproject.org/3.2.0/develop/west/manifest.html#projects
+    # Third-party module. Provides zmk,behavior-tri-state, which is what makes
+    # a dial-driven Cmd+Tab possible: it holds Cmd across detents instead of
+    # sending a fresh Cmd+Tab each time (which only ever flips two apps).
+    - name: dhruvinsh
+      url-base: https://github.com/dhruvinsh
   projects:
     - name: zmk
       remote: zmkfirmware
       revision: v0.3
       import: app/west.yml
+    - name: zmk-tri-state
+      remote: dhruvinsh
+      revision: main
   self:
     path: config
