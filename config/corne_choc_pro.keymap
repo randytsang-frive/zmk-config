@@ -115,6 +115,17 @@
             key-positions = <32 33>;
             bindings = <&tog 2>;
         };
+
+        // Bootloader used to be NUM + V, one key from RGB and caps-word, and
+        // it got hit by accident. Q + Z is top and bottom of the same pinky
+        // column -- never struck together in typing, and deliberately on the
+        // left half only, so it still works when the right half is off or
+        // unpaired.
+        combo_bootloader {
+            timeout-ms = <50>;
+            key-positions = <0 24>;
+            bindings = <&bootloader>;
+        };
     };
 
     keymap {
@@ -150,7 +161,7 @@
             // ---------------------------------------------------------------------------------
             // |  F1 |  F2 |  F3 |  F4 |  F5 | CMD-` | ZOOM |  /  |  7  |  8  |  9  |  *  |
             // | BT1 | BT2 | BT3 | BT4 | BT5 | SHOT4 | SHOT5|  -  |  4  |  5  |  6  |  +  |
-            // |     | RGB | CAPS| BOOT|UNLCK|                  0  |  1  |  2  |  3  |  .  |
+            // |     | RGB | CAPS|     |UNLCK|                  0  |  1  |  2  |  3  |  .  |
             //
             // Numpad sits under the right hand in the usual 789 / 456 / 123 grid,
             // with the operators on the outer columns. Z + X together latches
@@ -166,7 +177,7 @@
             bindings = <
                 &kp F1       &kp F2          &kp F3       &kp F4       &kp F5           &kp LG(GRAVE)     &pane_zoom       &kp FSLH  &kp N7    &kp N8    &kp N9    &kp ASTRK
                 &bt BT_SEL 0 &bt BT_SEL 1    &bt BT_SEL 2 &bt BT_SEL 3 &bt BT_SEL 4     &kp LG(LS(N4))    &kp LG(LS(N5))   &kp MINUS &kp N4    &kp N5    &kp N6    &kp PLUS
-                &trans       &rgb_ug RGB_TOG &caps_word   &bootloader  &studio_unlock                   &kp N0    &kp N1    &kp N2    &kp N3    &kp DOT
+                &trans       &rgb_ug RGB_TOG &caps_word   &trans       &studio_unlock                   &kp N0    &kp N1    &kp N2    &kp N3    &kp DOT
                                              &trans       &trans       &trans                   &trans  &trans    &trans
             >;
             sensor-bindings = <&app_switch      // left dial  -> Cmd+Tab
