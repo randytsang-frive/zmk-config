@@ -99,8 +99,10 @@
     // the thumb release turns it off again -- so nothing happens. A combo
     // fires with no layer held, so &tog behaves.
     //
-    //   Z + X together  -> latch NUMBER   (same combo again to leave)
-    //   . + / together  -> latch SYMBOL
+    //   Q + X together  -> latch NUMBER   (same combo again to leave)
+    //   ; + . together  -> latch SYMBOL
+    //   , + . together  -> switch to QWERTY (P + / in QWERTY terms, since it is
+    //                      the same two physical keys; same combo to come back)
     combos {
         compatible = "zmk,combos";
 
@@ -116,8 +118,23 @@
             bindings = <&tog 2>;
         };
 
+        // Fall back to QWERTY while Gallium is still being learned. Has to be a
+        // combo rather than a key parked on NUMBER: layer 3 outranks layer 1, so
+        // once QWERTY is on it would shadow any toggle key sitting underneath it
+        // and there would be no way back. Combos fire regardless of layer.
+        //
+        // Top and bottom of the right pinky column -- same finger, so it cannot
+        // be rolled by accident, and it mirrors the B + Q bootloader combo on the
+        // left. Right half only, which is fine for a layout switch (unlike the
+        // bootloader, which deliberately stays reachable with the right half off).
+        combo_qwerty {
+            timeout-ms = <50>;
+            key-positions = <11 33>;
+            bindings = <&tog 3>;
+        };
+
         // Bootloader used to be NUM + V, one key from RGB and caps-word, and
-        // it got hit by accident. Q + Z is top and bottom of the same pinky
+        // it got hit by accident. B + Q is top and bottom of the same pinky
         // column -- never struck together in typing, and deliberately on the
         // left half only, so it still works when the right half is off or
         // unpaired.
@@ -132,20 +149,38 @@
         compatible = "zmk,keymap";
 
         default_layer {
-            display-name = "QWERTY";
+            display-name = "GALLIUM";
             // ---------------------------------------------------------------------------------
-            // |  Q  |  W  |  E  |  R  |  T  | WISPR |  PLAY  |  Y  |  U  |  I  |  O  |  P  |
-            // |  A  |  S  |  D  |  F  |  G  | STCKY |   '    |  H  |  J  |  K  |  L  |  -  |
-            // |  Z  |  X  |  C  |  V  |  B  |                   N  |  M  |  ,  |  .  |  /  |
+            // |  B  |  L  |  D  |  C  |  V  | WISPR |  PLAY  |  J  |  Y  |  O  |  U  |  ,  |
+            // |  N  |  R  |  T  |  S  |  G  | STCKY |   -    |  P  |  H  |  A  |  E  |  I  |
+            // |  Q  |  X  |  M  |  W  |  Z  |                   K  |  F  |  '  |  ;  |  .  |
             //             | ESC/NUM | CMD | SPACE |     | RET | TAB/SYM | BSPC |
             //
-            // Left-hand holds, so the right hand can stay on the mouse:
-            //   A = Ctrl   S = Option   D = Cmd   F = Shift   B = Ctrl+B (prefix)
+            // Gallium v2, column-stagger variant. Replaces QWERTY because A and P
+            // were unreachable with the little fingers -- both now sit on the right
+            // hand's strong fingers (A = middle, P = index), on the home row.
+            //
+            // Modifiers, left hand only so the right hand can stay on the mouse.
+            // The pinky and ring columns carry NO holds at all -- that was half the
+            // original complaint -- so the three non-Cmd mods share the three
+            // strongest fingers, one mod per finger:
+            //
+            //   T = Shift (middle)   S = Option (index)   G = Ctrl (index inner)
+            //   CMD = left thumb, a plain key, no letter involved
+            //
+            // One mod per finger is what makes Ctrl+Shift and Ctrl+Option chordable
+            // at all. The order is deliberately inverted against letter frequency:
+            // Ctrl, whose misfire is destructive, sits on G (2%), the rarest letter
+            // here; Shift, whose misfire is a visible capital, takes T (9%), the
+            // commonest. Ctrl+T works because they are different fingers -- hold G,
+            // tap T.
+            //
+            // Z holds for the Ctrl+B prefix: near-zero frequency, so a safe host.
             bindings = <
-                &kp Q       &kp W       &kp E       &kp R        &kp T           &kp RCTRL   &kp C_PP   &kp Y   &kp U   &kp I     &kp O   &kp P
-                &hm LCTRL A &hm LALT S  &hm LGUI D  &hm LSHFT F  &kp G           &sk LSHFT   &kp SQT    &kp H   &kp J   &kp K     &kp L   &kp MINUS
-                &kp Z       &kp X       &kp C       &kp V        &pfx LC(B) B                           &kp N   &kp M   &kp COMMA &kp DOT &kp FSLH
-                                        &lt 1 ESC   &kp LGUI     &kp SPACE                   &kp RET    &lt 2 TAB   &kp BSPC
+                &kp B       &kp L       &kp D        &kp C       &kp V             &kp RCTRL   &kp C_PP    &kp J   &kp Y   &kp O     &kp U    &kp COMMA
+                &kp N       &kp R       &hm LSHFT T  &hm LALT S  &hm LCTRL G       &sk LSHFT   &kp MINUS   &kp P   &kp H   &kp A     &kp E    &kp I
+                &kp Q       &kp X       &kp M        &kp W       &pfx LC(B) Z                              &kp K   &kp F   &kp SQT   &kp SEMI &kp DOT
+                                        &lt 1 ESC    &kp LGUI    &kp SPACE                     &kp RET     &lt 2 TAB   &kp BSPC
             >;
             // Slots: left_ex1, left_ex2, right_ex1, right_ex2. Both slots per
             // half share a binding, so it works whichever socket the encoder
@@ -164,7 +199,7 @@
             // |     | RGB | CAPS|     |UNLCK|                  0  |  1  |  2  |  3  |  .  |
             //
             // Numpad sits under the right hand in the usual 789 / 456 / 123 grid,
-            // with the operators on the outer columns. Z + X together latches
+            // with the operators on the outer columns. Q + X together latches
             // this layer on so you can let go of the thumb; same combo to leave.
             //
             // Dial presses pair with what each dial does on this layer: the left
@@ -194,10 +229,16 @@
             // |  ~  |  `  | "|" |  \  |  /  |                 <  |  <- |  v  |  -> |  >  |
             //
             // Every symbol lives on the left half. The right hand gets an
-            // inverted-T of arrows on K / M / , / . so it can navigate without
-            // leaving home position.
+            // inverted-T of arrows -- described by position rather than by
+            // letter, so it survives the next layout change: UP is the right
+            // hand's middle-finger home key, with LEFT / DOWN / RIGHT on the
+            // three bottom-row keys under it. Navigation without leaving home.
             //
-            // . + / together latches this layer, mirroring Z + X on NUMBER.
+            // ; + . together latches this layer, mirroring Q + X on NUMBER.
+            //
+            // "/" lives here rather than on the base layer: Gallium has no
+            // base-layer slot for it, and keeping the alphas canonical means
+            // any typing trainer matches the board.
             bindings = <
                 &kp EXCL  &kp AT    &kp HASH  &kp DLLR  &kp PRCNT  &trans     &trans  &kp LBKT  &kp RBKT  &kp LBRC  &kp RBRC   &kp EQUAL
                 &kp CARET &kp AMPS  &kp ASTRK &kp LPAR  &kp RPAR   &trans     &trans  &kp MINUS &kp UNDER &kp UP    &kp PLUS   &kp SEMI
@@ -210,13 +251,19 @@
                                &inc_dec_kp C_VOL_UP C_VOL_DN>;
         };
 
-        extra_layer_1 {
-            display-name = "EXTRA 1";
+        // The old QWERTY layer, kept live for as long as Gallium is still being
+        // learned -- and for handing the board to someone else. Reached with the
+        // , + . combo (right pinky column, top and bottom); the same combo comes
+        // back. Everything except the alphas matches the base layer, so the
+        // thumbs, dials, sticky shift and both mod layers behave identically
+        // whichever alphabet is live.
+        qwerty_layer {
+            display-name = "QWERTY";
             bindings = <
-                &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans
-                &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans
-                &trans &trans &trans &trans &trans               &trans &trans &trans &trans &trans
-                              &trans &trans &trans               &trans &trans &trans
+                &kp Q       &kp W       &kp E       &kp R        &kp T           &kp RCTRL   &kp C_PP   &kp Y   &kp U   &kp I     &kp O   &kp P
+                &hm LCTRL A &hm LALT S  &hm LGUI D  &hm LSHFT F  &kp G           &sk LSHFT   &kp SQT    &kp H   &kp J   &kp K     &kp L   &kp MINUS
+                &kp Z       &kp X       &kp C       &kp V        &pfx LC(B) B                           &kp N   &kp M   &kp COMMA &kp DOT &kp FSLH
+                                        &lt 1 ESC   &kp LGUI     &kp SPACE                   &kp RET    &lt 2 TAB   &kp BSPC
             >;
         };
 
