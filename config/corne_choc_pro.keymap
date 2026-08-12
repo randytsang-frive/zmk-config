@@ -253,7 +253,7 @@
             display-name = "SYMBOL";
             // ---------------------------------------------------------------------------------
             // |  !  |  @  |  #  |  $  |  %  |     |     |  [  |  ]  |  {  |  }  |  =  |
-            // |  ^  |  &  |  *  |  (  |  )  |     |     |  -  |  _  |  ^  |  +  |  ;  |
+            // |  ^  |  &  |  *  |  (  |  )  |     |     |  -  |  _  |  ^  |  +  |  ?  |
             // |  ~  |  `  | "|" |  \  |  /  |                 <  |  <- |  v  |  -> |  >  |
             //
             // Every symbol lives on the left half. The right hand gets an
@@ -266,10 +266,13 @@
             //
             // "/" lives here rather than on the base layer: Gallium has no
             // base-layer slot for it, and keeping the alphas canonical means
-            // any typing trainer matches the board.
+            // any typing trainer matches the board. "?" takes the right pinky
+            // home key, which was a second ";" -- redundant, since ";" already
+            // has a base-layer slot. Without it "?" needed sticky shift plus
+            // this layer plus "/", three presses across both halves.
             bindings = <
                 &kp EXCL  &kp AT    &kp HASH  &kp DLLR  &kp PRCNT  &trans     &trans  &kp LBKT  &kp RBKT  &kp LBRC  &kp RBRC   &kp EQUAL
-                &kp CARET &kp AMPS  &kp ASTRK &kp LPAR  &kp RPAR   &trans     &trans  &kp MINUS &kp UNDER &kp UP    &kp PLUS   &kp SEMI
+                &kp CARET &kp AMPS  &kp ASTRK &kp LPAR  &kp RPAR   &trans     &trans  &kp MINUS &kp UNDER &kp UP    &kp PLUS   &kp QMARK
                 &kp TILDE &kp GRAVE &kp PIPE  &kp BSLH  &kp FSLH                     &kp LT    &kp LEFT  &kp DOWN  &kp RIGHT  &kp GT
                                     &trans    &trans    &trans             &trans  &trans    &trans
             >;
