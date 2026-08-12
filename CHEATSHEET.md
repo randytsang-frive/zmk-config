@@ -104,7 +104,8 @@ bootloader are 50 ms.
 
 F1–F5 on the top row; numpad `789 / 456 / 123 / 0` under the right hand with the operators
 on the outer columns. Caps-word on bottom row column 3. Cmd+Shift+4 on home row column 1,
-Cmd+Shift+5 on the right extra column. Cmd+` top row column 6.
+Cmd+Shift+5 on the right extra column. Cmd+` on the right half's top row column 6
+(the right dial's press).
 
 No connectivity keys — they moved to SYSTEM. The left half is otherwise `&none`.
 
@@ -115,7 +116,7 @@ No connectivity keys — they moved to SYSTEM. The left half is otherwise `&none
 | Layer | Left dial | Right dial |
 |---|---|---|
 | GALLIUM | volume | track skip |
-| NUMBER | Cmd+Tab app switcher (press = window cycle) | herdr pane cycle (press = zoom pane) |
+| NUMBER | herdr pane cycle (press = zoom pane) | Cmd+Tab app switcher (press = window cycle) |
 | SYMBOL | undo / redo | volume |
 
 ---
