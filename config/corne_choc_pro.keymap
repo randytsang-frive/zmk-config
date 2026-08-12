@@ -8,6 +8,7 @@
 #include <dt-bindings/zmk/keys.h>
 #include <dt-bindings/zmk/bt.h>
 #include <dt-bindings/zmk/rgb.h>
+#include <dt-bindings/zmk/outputs.h>
 
 / {
     chosen {
@@ -103,19 +104,36 @@
     //   ; + . together  -> latch SYMBOL
     //   , + . together  -> switch to QWERTY (P + / in QWERTY terms, since it is
     //                      the same two physical keys; same combo to come back)
+    //   N + Q together  -> back to the base layer, unconditionally (panic key)
     combos {
         compatible = "zmk,combos";
 
+        // 150ms, not 40ms. 40ms is inside the noise floor of a deliberate
+        // two-key press -- these latches were effectively unfireable, which
+        // also meant SYMBOL could be entered by the thumb and then not left,
+        // since the same combo is the only way out. Same finger or same hand
+        // on every combo here, so nothing in this range can be rolled by
+        // accident during typing.
         combo_lock_num {
-            timeout-ms = <40>;
+            timeout-ms = <150>;
             key-positions = <24 25>;
             bindings = <&tog 1>;
         };
 
         combo_lock_sym {
-            timeout-ms = <40>;
+            timeout-ms = <150>;
             key-positions = <32 33>;
             bindings = <&tog 2>;
+        };
+
+        // Panic key. Nothing else in this keymap is an unconditional &to 0, so
+        // any latch that would not unlatch meant a power cycle. Left pinky,
+        // home row + bottom row: same finger, unrollable, and on the left half
+        // so it works with the right half off or unpaired.
+        combo_base {
+            timeout-ms = <150>;
+            key-positions = <12 24>;
+            bindings = <&to 0>;
         };
 
         // Fall back to QWERTY while Gallium is still being learned. Has to be a
@@ -196,11 +214,21 @@
             // ---------------------------------------------------------------------------------
             // |  F1 |  F2 |  F3 |  F4 |  F5 | CMD-` | ZOOM |  /  |  7  |  8  |  9  |  *  |
             // | BT1 | BT2 | BT3 | BT4 | BT5 | SHOT4 | SHOT5|  -  |  4  |  5  |  6  |  +  |
-            // |     | RGB | CAPS|     |UNLCK|                  0  |  1  |  2  |  3  |  .  |
+            // | OUT | RGB | CAPS|BTCLR|UNLCK|                  0  |  1  |  2  |  3  |  .  |
             //
             // Numpad sits under the right hand in the usual 789 / 456 / 123 grid,
             // with the operators on the outer columns. Q + X together latches
             // this layer on so you can let go of the thumb; same combo to leave.
+            //
+            // OUT and BTCLR are the two connectivity escape hatches, both added
+            // after a session where the board typed fine over USB, reported
+            // itself paired over Bluetooth, and sent nothing. OUT toggles the
+            // output endpoint: ZMK persists that preference, so a board left
+            // preferring USB goes silent the moment the cable comes out, with
+            // nothing in the keymap to switch it back. BTCLR wipes the bond on
+            // the *current* profile only, for when a profile is poisoned on
+            // both ends -- previously the only recourse was to walk to one of
+            // the four unused BT_SEL slots and eventually run out.
             //
             // Dial presses pair with what each dial does on this layer: the left
             // dial picks an app, its press walks that app's windows; the right
@@ -212,7 +240,7 @@
             bindings = <
                 &kp F1       &kp F2          &kp F3       &kp F4       &kp F5           &kp LG(GRAVE)     &pane_zoom       &kp FSLH  &kp N7    &kp N8    &kp N9    &kp ASTRK
                 &bt BT_SEL 0 &bt BT_SEL 1    &bt BT_SEL 2 &bt BT_SEL 3 &bt BT_SEL 4     &kp LG(LS(N4))    &kp LG(LS(N5))   &kp MINUS &kp N4    &kp N5    &kp N6    &kp PLUS
-                &trans       &rgb_ug RGB_TOG &caps_word   &trans       &studio_unlock                   &kp N0    &kp N1    &kp N2    &kp N3    &kp DOT
+                &out OUT_TOG &rgb_ug RGB_TOG &caps_word   &bt BT_CLR   &studio_unlock                   &kp N0    &kp N1    &kp N2    &kp N3    &kp DOT
                                              &trans       &trans       &trans                   &trans  &trans    &trans
             >;
             sensor-bindings = <&app_switch      // left dial  -> Cmd+Tab
