@@ -213,12 +213,21 @@
             display-name = "NUMBER";
             // ---------------------------------------------------------------------------------
             // |  F1 |  F2 |  F3 |  F4 |  F5 | CMD-` | ZOOM |  /  |  7  |  8  |  9  |  *  |
-            // | BT1 | BT2 | BT3 | BT4 | BT5 | SHOT4 | SHOT5|  -  |  4  |  5  |  6  |  +  |
-            // | OUT | RGB | CAPS|BTCLR|UNLCK|                  0  |  1  |  2  |  3  |  .  |
+            // |SHOT4| BT1 | BT2 | BT3 | BT4 |  BT5  | SHOT5|  -  |  4  |  5  |  6  |  +  |
+            // |UNLCK| RGB | CAPS|BTCLR| OUT |                  0  |  1  |  2  |  3  |  .  |
             //
             // Numpad sits under the right hand in the usual 789 / 456 / 123 grid,
             // with the operators on the outer columns. Q + X together latches
             // this layer on so you can let go of the thumb; same combo to leave.
+            //
+            // Nothing that can break connectivity sits on a combo key position.
+            // The pinky column used to hold BT_SEL 0 on the home row and OUT on
+            // the bottom row -- which are exactly the two keys the panic combo
+            // (N + Q) uses. Fumble that combo while NUMBER is live and you get
+            // BT profile 0 plus the output endpoint flipped to USB: the board
+            // goes silent over Bluetooth, and every retry of the combo does it
+            // again. Both are now one column in, off every combo position, with
+            // harmless keys (a screenshot, Studio unlock) left in their place.
             //
             // OUT and BTCLR are the two connectivity escape hatches, both added
             // after a session where the board typed fine over USB, reported
@@ -239,8 +248,8 @@
             // Cmd+Shift+5 for the capture toolbar.
             bindings = <
                 &kp F1       &kp F2          &kp F3       &kp F4       &kp F5           &kp LG(GRAVE)     &pane_zoom       &kp FSLH  &kp N7    &kp N8    &kp N9    &kp ASTRK
-                &bt BT_SEL 0 &bt BT_SEL 1    &bt BT_SEL 2 &bt BT_SEL 3 &bt BT_SEL 4     &kp LG(LS(N4))    &kp LG(LS(N5))   &kp MINUS &kp N4    &kp N5    &kp N6    &kp PLUS
-                &out OUT_TOG &rgb_ug RGB_TOG &caps_word   &bt BT_CLR   &studio_unlock                   &kp N0    &kp N1    &kp N2    &kp N3    &kp DOT
+                &kp LG(LS(N4)) &bt BT_SEL 0  &bt BT_SEL 1 &bt BT_SEL 2 &bt BT_SEL 3     &bt BT_SEL 4      &kp LG(LS(N5))   &kp MINUS &kp N4    &kp N5    &kp N6    &kp PLUS
+                &studio_unlock &rgb_ug RGB_TOG &caps_word &bt BT_CLR   &out OUT_TOG                     &kp N0    &kp N1    &kp N2    &kp N3    &kp DOT
                                              &trans       &trans       &trans                   &trans  &trans    &trans
             >;
             sensor-bindings = <&app_switch      // left dial  -> Cmd+Tab
