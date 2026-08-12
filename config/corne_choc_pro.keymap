@@ -286,23 +286,24 @@
             // the four unused BT_SEL slots and eventually run out.
             //
             // Dial presses pair with what each dial does on this layer: the left
-            // dial picks an app, its press walks that app's windows; the right
-            // dial finds a pane, its press zooms it.
+            // dial finds a pane, its press zooms it; the right dial picks an
+            // app, its press walks that app's windows. Both moved with their
+            // dials when the two swapped hands.
             //
             // Screenshots sit on the inner columns -- Cmd+Shift+4 for a region
             // (left hand only, so the mouse is free to drag it out) and
             // Cmd+Shift+5 for the capture toolbar. Cmd+Shift+4 keeps the pinky
             // home position it inherited when the BT keys moved out.
             bindings = <
-                &kp F1         &kp F2  &kp F3      &kp F4  &kp F5           &kp LG(GRAVE)     &pane_zoom       &kp FSLH  &kp N7    &kp N8    &kp N9    &kp ASTRK
+                &kp F1         &kp F2  &kp F3      &kp F4  &kp F5           &pane_zoom        &kp LG(GRAVE)    &kp FSLH  &kp N7    &kp N8    &kp N9    &kp ASTRK
                 &kp LG(LS(N4)) &none   &none       &none   &none            &none             &kp LG(LS(N5))   &kp MINUS &kp N4    &kp N5    &kp N6    &kp PLUS
                 &none          &none   &caps_word  &none   &none                             &kp N0    &kp N1    &kp N2    &kp N3    &kp DOT
                                              &trans       &trans       &trans                   &trans  &trans    &trans
             >;
-            sensor-bindings = <&app_switch      // left dial  -> Cmd+Tab
-                               &app_switch
-                               &pane_cycle      // right dial -> herdr panes
-                               &pane_cycle>;
+            sensor-bindings = <&pane_cycle      // left dial  -> herdr panes
+                               &pane_cycle
+                               &app_switch      // right dial -> Cmd+Tab
+                               &app_switch>;
         };
 
         raise_layer {
