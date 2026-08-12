@@ -44,6 +44,29 @@
             bindings = <&kp>, <&kp>;
         };
 
+        // Entry to the SYSTEM layer is a *hold*, not a chord.
+        //
+        // Every previous guard here was positional -- pick keys that typing
+        // cannot roll -- and every one of them eventually misfired, because the
+        // thing actually pressing them was not typing. A hand grabbing the
+        // board by its edge, or the board pressed against something in a bag,
+        // presses a whole region at once, and no choice of three key positions
+        // survives that. require-prior-idle-ms does not help either: a board
+        // being picked up has been idle for hours.
+        //
+        // Time is the guard that region-presses cannot pass. 750ms of sustained
+        // hold is not something a grip or a bag does. Both branches are &to,
+        // which also sidesteps hold-tap's requirement that both behaviours take
+        // exactly one parameter -- and makes the accidental case harmless: a
+        // short squeeze lands on &to 0 and just re-asserts the base layer.
+        sys: system_hold_tap {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "tap-preferred";
+            tapping-term-ms = <750>;
+            bindings = <&to>, <&to>;
+        };
+
         // Cmd+Tab app switcher. Presses Cmd on the first detent, pulses Tab on
         // each one after, and releases Cmd on any other key or layer change --
         // which here means letting go of the NUMBER layer commits the switch.
@@ -151,13 +174,35 @@
             bindings = <&tog 3>;
         };
 
-        // Bootloader used to be NUM + V, one key from RGB and caps-word, and
-        // it got hit by accident. B + Q is top and bottom of the same pinky
-        // column -- never struck together in typing, and deliberately on the
-        // left half only, so it still works when the right half is off or
-        // unpaired.
+        // Entry to SYSTEM, which is where everything that can break
+        // connectivity now lives. Hold all three for 750ms; a shorter press is
+        // &to 0 and does nothing you would notice.
+        //
+        // Positions are deliberately *interior* to the left half. The pinky
+        // column is the edge a hand grabs when it picks the board up, and the
+        // old bootloader combo sat on top and bottom of exactly that column --
+        // which is how the board kept ending up in the UF2 bootloader. Nothing
+        // here is on it. Left half only, so SYSTEM is still reachable when the
+        // right half is off, flat or unpaired -- which is precisely when you
+        // need it.
+        //
+        // W and not Z for the bottom-row key: Z carries the pfx hold-tap, and a
+        // 750ms hold on a hold-tap member is asking for a stray Ctrl+B.
+        combo_system {
+            timeout-ms = <150>;
+            require-prior-idle-ms = <250>;
+            key-positions = <2 27 35>;
+            bindings = <&sys 4 0>;
+        };
+
+        // Bootloader is B + Q -- top and bottom of the left pinky column, the
+        // same chord as before -- but restricted to SYSTEM. On every other
+        // layer it is inert, so the geometry stops mattering: you cannot reach
+        // it without holding your way into SYSTEM first. Two deliberate acts,
+        // and the second one is only available after the first.
         combo_bootloader {
             timeout-ms = <50>;
+            layers = <4>;
             key-positions = <0 24>;
             bindings = <&bootloader>;
         };
@@ -213,27 +258,28 @@
             display-name = "NUMBER";
             // ---------------------------------------------------------------------------------
             // |  F1 |  F2 |  F3 |  F4 |  F5 | CMD-` | ZOOM |  /  |  7  |  8  |  9  |  *  |
-            // |SHOT4| BT1 | BT2 | BT3 | BT4 |  BT5  | SHOT5|  -  |  4  |  5  |  6  |  +  |
-            // |UNLCK| RGB | CAPS|BTCLR| OUT |                  0  |  1  |  2  |  3  |  .  |
+            // |SHOT4|     |     |     |     |       | SHOT5|  -  |  4  |  5  |  6  |  +  |
+            // |     |     | CAPS|     |     |                  0  |  1  |  2  |  3  |  .  |
             //
             // Numpad sits under the right hand in the usual 789 / 456 / 123 grid,
             // with the operators on the outer columns. Q + X together latches
             // this layer on so you can let go of the thumb; same combo to leave.
             //
-            // Nothing that can break connectivity sits on a combo key position.
-            // The pinky column used to hold BT_SEL 0 on the home row and OUT on
-            // the bottom row -- which are exactly the two keys the panic combo
-            // (N + Q) uses. Fumble that combo while NUMBER is live and you get
-            // BT profile 0 plus the output endpoint flipped to USB: the board
-            // goes silent over Bluetooth, and every retry of the combo does it
-            // again. Both are now one column in, off every combo position, with
-            // harmless keys (a screenshot, Studio unlock) left in their place.
+            // The BT profiles, BTCLR, OUT, Studio unlock and the RGB toggle all
+            // used to live on this layer's left half. They are on SYSTEM now.
+            // Moving them one column inward (the previous fix) shrank the blast
+            // radius but left them one thumb-hold from the base layer, and a
+            // thumb-hold is not a meaningful barrier in front of a key that can
+            // silence the board. The freed positions are &none rather than
+            // &trans: a stray press here should do nothing, not fall through to
+            // a letter.
             //
-            // OUT and BTCLR are the two connectivity escape hatches, both added
-            // after a session where the board typed fine over USB, reported
-            // itself paired over Bluetooth, and sent nothing. OUT toggles the
-            // output endpoint: ZMK persists that preference, so a board left
-            // preferring USB goes silent the moment the cable comes out, with
+            // OUT and BTCLR -- now on SYSTEM -- are the two connectivity escape
+            // hatches, both added after a session where the board typed fine
+            // over USB, reported itself paired over Bluetooth, and sent
+            // nothing. OUT toggles the output endpoint: ZMK persists that
+            // preference, so a board left preferring USB goes silent the moment
+            // the cable comes out, with
             // nothing in the keymap to switch it back. BTCLR wipes the bond on
             // the *current* profile only, for when a profile is poisoned on
             // both ends -- previously the only recourse was to walk to one of
@@ -245,11 +291,12 @@
             //
             // Screenshots sit on the inner columns -- Cmd+Shift+4 for a region
             // (left hand only, so the mouse is free to drag it out) and
-            // Cmd+Shift+5 for the capture toolbar.
+            // Cmd+Shift+5 for the capture toolbar. Cmd+Shift+4 keeps the pinky
+            // home position it inherited when the BT keys moved out.
             bindings = <
-                &kp F1       &kp F2          &kp F3       &kp F4       &kp F5           &kp LG(GRAVE)     &pane_zoom       &kp FSLH  &kp N7    &kp N8    &kp N9    &kp ASTRK
-                &kp LG(LS(N4)) &bt BT_SEL 0  &bt BT_SEL 1 &bt BT_SEL 2 &bt BT_SEL 3     &bt BT_SEL 4      &kp LG(LS(N5))   &kp MINUS &kp N4    &kp N5    &kp N6    &kp PLUS
-                &studio_unlock &rgb_ug RGB_TOG &caps_word &bt BT_CLR   &out OUT_TOG                     &kp N0    &kp N1    &kp N2    &kp N3    &kp DOT
+                &kp F1         &kp F2  &kp F3      &kp F4  &kp F5           &kp LG(GRAVE)     &pane_zoom       &kp FSLH  &kp N7    &kp N8    &kp N9    &kp ASTRK
+                &kp LG(LS(N4)) &none   &none       &none   &none            &none             &kp LG(LS(N5))   &kp MINUS &kp N4    &kp N5    &kp N6    &kp PLUS
+                &none          &none   &caps_word  &none   &none                             &kp N0    &kp N1    &kp N2    &kp N3    &kp DOT
                                              &trans       &trans       &trans                   &trans  &trans    &trans
             >;
             sensor-bindings = <&app_switch      // left dial  -> Cmd+Tab
@@ -307,13 +354,39 @@
             >;
         };
 
-        extra_layer_2 {
-            display-name = "EXTRA 2";
+        // Everything that can take the keyboard away from you lives here and
+        // nowhere else. Reached only by holding D + W + CMD for 750ms; left by
+        // the inner left thumb, or by the N + Q panic combo from anywhere.
+        //
+        // ---------------------------------------------------------------------------------
+        // |     |     |     |     |     |     |     |     |     |     |     |     |
+        // | BT0 | BT1 | BT2 | BT3 | BT4 |     |     |     |     |     |     |     |
+        // |UNLCK| RGB |     |BTCLR| OUT |                 |     |     |     |     |
+        //             |     |     |BASE |     |     |     |     |
+        //
+        // The left half carries all of it, on purpose: the moment you need this
+        // layer is the moment the right half may be off, flat or unpaired, and
+        // a recovery key you cannot reach is not a recovery key.
+        //
+        // BT profiles run along the home row, one tap each, because walking the
+        // five slots is the single most common thing you come here to do.
+        // BTCLR and OUT keep the bottom-row positions they had on NUMBER, so
+        // the muscle memory built up over the last two lockouts still works.
+        //
+        // &bootloader is deliberately not a key. It is combo_bootloader
+        // (B + Q), gated to this layer -- so reaching it is a hold, then a
+        // chord, and neither happens by accident.
+        //
+        // Every unused position is &none. On a layer where a single tap can
+        // flip the output endpoint, a key that does nothing is worth more than
+        // a key that falls through to a letter.
+        system_layer {
+            display-name = "SYSTEM";
             bindings = <
-                &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans
-                &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans &trans
-                &trans &trans &trans &trans &trans               &trans &trans &trans &trans &trans
-                              &trans &trans &trans               &trans &trans &trans
+                &none          &none           &none &none      &none        &none  &none  &none &none &none &none &none
+                &bt BT_SEL 0   &bt BT_SEL 1    &bt BT_SEL 2 &bt BT_SEL 3 &bt BT_SEL 4 &none &none &none &none &none &none &none
+                &studio_unlock &rgb_ug RGB_TOG &none &bt BT_CLR &out OUT_TOG               &none &none &none &none &none
+                                               &none &none     &to 0                &none &none &none
             >;
         };
 
